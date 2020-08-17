@@ -8,7 +8,6 @@ Created on Sat Aug 15 21:45:14 2020
 # ArmOfState2
 
 import discord
-#from google.colab import files
 import tensorflow as tf
 from tensorflow import keras
 print(tf.__version__)
@@ -52,7 +51,6 @@ async def on_message(message):
             await message.channel.send(short_model_summary)
     
             
-
 print('Connected to client.')
 
 client.run(token)
