@@ -4,7 +4,7 @@ Created on Sat Aug 15 21:45:14 2020
 
 @author: Thomas DeWitt
 
-Contributor: Andrew Lu (dinitrogen-tetroxide)
+Contributor: Andrew Lu
 """
 
 # ArmOfState2
@@ -56,15 +56,23 @@ def score_text(model, toxic_preds, message_string, tokenizer, max_length, paddin
         score = np.argmax(exe_preds, axis=1)
     return score
 
-
+"""
+Smaller Todo:
+For variables that rely on data might be a good idea to store in a separate txt file (maybe not prefix, but stuff like messages and authors which have the potential of getting way too large)
+For handling users, instead of using User.name maybe use User.id
+"""
+# Tokens & Prefix
 token = read_token()
 prefix = "?"
 
+# Master users
 master_users = ["das.lionfish#9316"]
-                
+
+# Scraping info
 messages = []
 authors = []
 
+# Model statuses
 scrape_messages = False
 prep_to_analyze = False
 model_ready = False
