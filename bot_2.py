@@ -34,7 +34,23 @@ def read_token():
     with open("token.txt", "r") as file:
         lines = file.readlines()
         return lines[0].strip()
+
+"""
+# <uid> <score>\n
+def load_scores():
+    scores = {}
+    with open("scores.txt", "r") as file:
+    for line in file.readlines():
+        splitline = line.rstrip("\n").split(" ")
+        scores[splitline[0]] = float(splitline[1])
+    return scores
     
+def save_scores(scores):  # have it update every 10 minutes or something
+    with open("scores.txt", "w") as file:
+        for i in toxidict.items():
+            file.write(str(i[0]) + " " + str(i[1]) + "\n")
+"""
+
 def load_preprocessing():
     with open('toxic_tokenizer.pickle', 'rb') as handle:
         toxic_tokenizer = pickle.load(handle)  # load ToxiNet tokenizer
@@ -57,9 +73,9 @@ def score_text(model, toxic_preds, message_string, tokenizer, max_length, paddin
     return score
 
 """
-Smaller Todo:
-For variables that rely on data might be a good idea to store in a separate txt file (maybe not prefix, but stuff like messages and authors which have the potential of getting way too large)
+Notes:
 For handling users, instead of using User.name maybe use User.id
+
 """
 # Tokens & Prefix
 token = read_token()
@@ -76,6 +92,9 @@ authors = []
 scrape_messages = False
 prep_to_analyze = False
 model_ready = False
+
+# Load toxicity scores
+# toxiscore = load_scores()
 
 client = discord.Client()
 
