@@ -42,7 +42,7 @@ def load_scores():
     with open("scores.txt", "r") as file:
     for line in file.readlines():
         split_line = line.rstrip("\n").split(" ")
-        scores[split_line[0]] = float(split_line[1])
+        scores[int(split_line[0])] = float(split_line[1])
     return scores
     
 def save_scores():  # have it update every 10 minutes or something
@@ -73,13 +73,15 @@ def score_text(model, toxic_preds, message_string, tokenizer, max_length, paddin
 
 def manage_toxiscores(uid, message_score):
     user_score = toxiscores[uid]
+    print(user_score)
     if message_score == 0:  # Losing toxicity
-        user_score -= round(modifier(user_score), 2)
-        user_score = 0.00 if scores[uid] < 0.00
+        user_score -= round(modifier(user_score) * gain, 2)
+        user_score = 0.00 if scores[uid] < 0.00 else user_score
     else:  # Gaining toxicity
-        user_score += round(modifier(user_score) * message_score, 2)
-    
+        user_score += round(modifier(user_score) * message_score * loss, 2)
+
     toxiscores[uid] = user_score
+    print(toxiscores[uid])
 
 """
 Notes:
@@ -105,10 +107,10 @@ model_ready = False
 # Load toxicity scores
 toxiscores = load_scores()
 
-# Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, currently commented out since modifier already modified by message score
+# Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, 1 gain/loss default
 modifier = lambda x : round(pow(1.075, -3/8 * x), 2)
-# loss = 4
-# gain = 2
+gain = 1
+loss = 1
 
 client = discord.Client()
 
