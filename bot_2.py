@@ -35,21 +35,20 @@ def read_token():
         lines = file.readlines()
         return lines[0].strip()
 
-"""
-# <uid> <score>\n
+
+# Format: <uid> <score>\n
 def load_scores():
     scores = {}
     with open("scores.txt", "r") as file:
     for line in file.readlines():
-        splitline = line.rstrip("\n").split(" ")
-        scores[splitline[0]] = float(splitline[1])
+        split_line = line.rstrip("\n").split(" ")
+        scores[split_line[0]] = float(split_line[1])
     return scores
     
-def save_scores(scores):  # have it update every 10 minutes or something
+def save_scores():  # have it update every 10 minutes or something
     with open("scores.txt", "w") as file:
-        for i in toxidict.items():
+        for i in toxiscores.items():
             file.write(str(i[0]) + " " + str(i[1]) + "\n")
-"""
 
 def load_preprocessing():
     with open('toxic_tokenizer.pickle', 'rb') as handle:
@@ -72,6 +71,16 @@ def score_text(model, toxic_preds, message_string, tokenizer, max_length, paddin
         score = np.argmax(exe_preds, axis=1)
     return score
 
+def manage_toxiscores(uid, message_score):
+    user_score = toxiscores[uid]
+    if message_score == 0:  # Losing toxicity
+        user_score -= round(modifier(user_score), 2)
+        user_score = 0.00 if scores[uid] < 0.00
+    else:  # Gaining toxicity
+        user_score += round(modifier(user_score) * message_score, 2)
+    
+    toxiscores[uid] = user_score
+
 """
 Notes:
 For handling users, instead of using User.name maybe use User.id
@@ -81,10 +90,10 @@ For handling users, instead of using User.name maybe use User.id
 token = read_token()
 prefix = "?"
 
-# Master users
+# Master users (Convert to uid?)
 master_users = ["das.lionfish#9316"]
 
-# Scraping info
+# Scraping info (Eventually write to file instead)
 messages = []
 authors = []
 
@@ -94,7 +103,12 @@ prep_to_analyze = False
 model_ready = False
 
 # Load toxicity scores
-# toxiscore = load_scores()
+toxiscores = load_scores()
+
+# Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, currently commented out since modifier already modified by message score
+modifier = lambda x : round(pow(1.075, -3/8 * x), 2)
+# loss = 4
+# gain = 2
 
 client = discord.Client()
 
@@ -133,7 +147,7 @@ async def on_message(message):
                 else:
                     await message.channel.send('Models not loaded.  Please load models.')
     
-    if scrape_messages == True:
+    if scrape_messages == True:  # Eventually directly write to a file, also maybe only from one channel?
         messages.append(str(message.content))
         authors.append(str(message.author))
         
