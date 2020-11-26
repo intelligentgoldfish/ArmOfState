@@ -10,9 +10,10 @@ Contributor: Andrew Lu
 # ArmOfState2
 
 import discord
+import csv
+import pickle
 import pandas as pd
 import numpy as np
-import pickle
 import tensorflow as tf
 from tensorflow import keras
 # from tensorflow.keras.preprocessing.text import Tokenizer
@@ -26,27 +27,29 @@ print(keras.__version__)
 # Create user list
 # Handle new users coming in
 
-
-
 def read_token():
     with open("token.txt", "r") as file:
         lines = file.readlines()
         return lines[0].strip()
 
-
-# Format: <uid> <score>\n
+# Format: <string uid> <float 2 score>\n
 def load_scores():
     scores = {}
-    with open("scores.txt", "r") as file:
-    for line in file.readlines():
-        split_line = line.rstrip("\n").split(" ")
-        scores[int(split_line[0])] = float(split_line[1])
-    return scores
+    try:
+        with open("scores.csv", "r", newline="") as csvfile:
+            lines = csv.reader(csvfile)
+            for line in lines:
+                scores[str(line[0])] = float(line[1])
+        return scores
+    except:
+        with open("scores.csv", "w"):
+            return scores
     
-def save_scores():  # have it update every 10 minutes or something
-    with open("scores.txt", "w") as file:
-        for i in toxiscores.items():
-            file.write(str(i[0]) + " " + str(i[1]) + "\n")
+def save_scores():  # have it update every 10 minutes or something eventually
+    with open("scores.csv", "w", newline="") as csvfile:
+        save = csv.writer(csvfile)
+        for pairs in toxiscores.items():
+            save.writerow([str(pairs[0]), str(pairs[1])])
 
 def load_preprocessing():
     with open('toxic_tokenizer.pickle', 'rb') as handle:
@@ -70,16 +73,18 @@ def score_text(model, toxic_preds, message_string, tokenizer, max_length, paddin
     return score
 
 def manage_toxiscores(uid, message_score):
+    if uid not in toxiscores.keys():
+        toxiscores[uid] = 0.00
+    
     user_score = toxiscores[uid]
-    print(user_score)
-    if message_score == 0:  # Losing toxicity
-        user_score -= round(modifier(user_score) * gain, 2)
-        user_score = 0.00 if scores[uid] < 0.00 else user_score
+    
+    if message_score <= 0.00:  # Losing toxicity
+        user_score -= modifier(user_score) * loss
+        user_score = 0.00 if toxiscores[uid] <= 0.00 else user_score
     else:  # Gaining toxicity
-        user_score += round(modifier(user_score) * message_score * loss, 2)
+        user_score += modifier(user_score) * message_score * gain
 
-    toxiscores[uid] = user_score
-    print(toxiscores[uid])
+    toxiscores[uid] = round(user_score, 2)
 
 """
 Notes:
