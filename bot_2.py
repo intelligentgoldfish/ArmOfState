@@ -82,7 +82,6 @@ def manage_toxiscores(uid, message_score):
         user_score += modifier(user_score) * message_score * gain
 
     toxiscores[uid] = round(user_score, 2)
-    return toxiscores
 
 """
 Notes:
