@@ -52,24 +52,21 @@ def save_scores():  # have it update every 10 minutes or something eventually
             save.writerow([str(pairs[0]), str(pairs[1])])
 
 def load_preprocessing():
-    with open('toxic_tokenizer.pickle', 'rb') as handle:
-        toxic_tokenizer = pickle.load(handle)  # load ToxiNet tokenizer
-    with open('exe_tokenizer.pickle','rb') as handle:
-        exe_tokenizer = pickle.load(handle)  # load ExeNet tokenizer
-    max_length = 400  # cut/pad all sentences to 400 tokens (words)
+    with open('tokenizer.pickle', 'rb') as handle:
+        tokenizer = pickle.load(handle)  # load network tokenizer
+    max_length = 200  # cut/pad all sentences to 400 tokens (words)
     trunc_type = 'post'
     padding_type = 'post'
     embedding_dimension = 100
-    return toxic_tokenizer, exe_tokenizer, max_length, trunc_type, padding_type, embedding_dimension
+    return tokenizer, max_length, trunc_type, padding_type, embedding_dimension
 
-def score_text(model, toxic_preds, message_string, tokenizer, max_length, padding_type, trunc_type):
-    if toxic_preds <= 0.75:
+def score_text(toxic_preds):
+    if max(toxic_preds) <= 60:
         score = 0
     else:
-        exe_tokens = tokenizer.texts_to_sequences(message_string)
-        exe_ready = pad_sequences(exe_tokens, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-        exe_preds = model.predict(exe_ready)
-        score = np.argmax(exe_preds, axis=1)
+        scale = max(toxic_preds)
+        rank = toxic_preds.index(scale)
+        score = scale * rank
     return score
 
 def manage_toxiscores(uid, message_score):
@@ -85,10 +82,12 @@ def manage_toxiscores(uid, message_score):
         user_score += modifier(user_score) * message_score * gain
 
     toxiscores[uid] = round(user_score, 2)
+    return toxiscores
 
 """
 Notes:
 For handling users, instead of using User.name maybe use User.id
+-Done (ATD 11/26/20 19:50)
 
 """
 # Tokens & Prefix
@@ -131,13 +130,10 @@ async def on_message(message):
     if message.content.startswith('!#init_network'):
         if str(message.author) in master_users:
             await message.channel.send('Unpacking model...')
-            toxic_model = tf.keras.models.load_model('saved_model/ToxiNet')
-            exe_model = tf.keras.models.load_model('saved_model/ExeNet')
-            toxic_tokenizer, exe_tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
-            # edit above to spec as ToxiNet params, load ExeNet model and params
-            # above line also now loads ExeNet tokenizer as exe_tokenizer
+            model = tf.keras.models.load_model('classifier/AoS_GPnet')
+            tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
             model_ready = True
-            await message.channel.send('Models loaded.  Displaying ToxiNet parameters...')
+            await message.channel.send('Models loaded.  Displaying parameters...')
             stringlist = []
             toxic_model.summary(print_fn=lambda x: stringlist.append(x))
             short_model_summary = "\n".join(stringlist)
@@ -158,12 +154,13 @@ async def on_message(message):
         
     if prep_to_analyze == True:
         words = str(message.content)
-        toxic_tokens = toxic_tokenizer.texts_to_sequences(words)
+        toxic_tokens = tokenizer.texts_to_sequences(words)
         toxic_ready = pad_sequences(toxic_tokens, maxlen=max_length, padding=padding_type, truncating=trunc_type)
-        toxic_preds = toxic_model.predict(toxic_ready)
+        toxic_preds = model.predict(toxic_ready)
         toxic_results = np.argmax(toxic_preds, axis=1)
-        toxic_score = score_text(exe_model, toxic_results, words, exe_tokenizer, max_length, padding_type, trunc_type)
-        # add in ExeNet functions here
+        toxic_score = score_text(toxic_results)
+        offender = str(message.author.id)
+        toxiscores = manage_toxiscores(offender, toxic_score)
 
     if message.content == '?hello':
         reply = 'Greetings, citizen.'
