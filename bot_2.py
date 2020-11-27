@@ -94,7 +94,7 @@ token = read_token()
 prefix = "?"
 
 # Master users (Convert to uid?)
-master_users = ["das.lionfish#9316"]
+master_users = ["641816848865689611"]
 
 # Scraping info (Eventually write to file instead)
 messages = []
@@ -117,17 +117,17 @@ client = discord.Client()
 
 @client.event
 async def on_message(message):
-    # don't reply to self
-    if message.author == client.user:
+    # Don't talk to bots (including self)
+    if message.author.bot:
         return
     
     if message.content.startswin('!#scrape'):
-        if str(message.author) in master_users:
+        if str(message.author.id) in master_users:
             scrape_messages = True
             await message.channel.send('WARNING: all messages following this message will be filed for training purpose.')
     
     if message.content.startswith('!#init_network'):
-        if str(message.author) in master_users:
+        if str(message.author.id) in master_users:
             await message.channel.send('Unpacking model...')
             model = tf.keras.models.load_model('classifier/AoS_GPnet')
             tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
@@ -140,16 +140,23 @@ async def on_message(message):
             
     
     if message.content.startswith('!#process'):
-            if str(message.author) in master_users:
+            if str(message.author.id) in master_users:
                 if model_ready == True:
                     prep_to_analyze = True
                     await message.channel.send('Analysis framework active.')
                 else:
                     await message.channel.send('Models not loaded.  Please load models.')
+
+    if message.content.startswith('!#killall'):
+        if str(message.author.id) in master_users:
+            await message.channel.send('Saving data...')
+            data = pd.DataFrame(data={'user': authors, 'message': messages})
+            data.to_csv('C:/Users/Thomas DeWitt/Downloads/discord_messages.csv', sep=',', index=False)  # Change this eventually
+            await client.logout()
     
     if scrape_messages == True:  # Eventually directly write to a file, also maybe only from one channel?
         messages.append(str(message.content))
-        authors.append(str(message.author))
+        authors.append(str(message.author.id))
         
     if prep_to_analyze == True:
         words = str(message.content)
@@ -165,12 +172,6 @@ async def on_message(message):
         reply = 'Greetings, citizen.'
         await message.channel.send(reply)
     
-    if message.content.startswith('!#killall'):
-        if str(message.author) in master_users:
-            await message.channel.send('Saving data...')
-            data = pd.DataFrame(data={'user': authors, 'message': messages})
-            data.to_csv('C:/Users/Thomas DeWitt/Downloads/discord_messages.csv', sep=',', index=False)
-            await client.logout()
     
 
 
