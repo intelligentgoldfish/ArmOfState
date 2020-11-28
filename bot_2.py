@@ -25,7 +25,7 @@ print(keras.__version__)
 # DONE - Create and import ExeNet tokenizer and ExeNet model alongside ToxiNet resources
 # Dynamically handle rankings
 # Create user list
-# Handle new users coming in
+# DONE - Handle new users coming in (See manage_toxiscores)
 
 def read_token():
     with open("token.txt", "r") as file:
@@ -52,11 +52,11 @@ def save_scores():  # have it update every 10 minutes or something eventually
             save.writerow([str(pairs[0]), str(pairs[1])])
 
 def load_preprocessing():
-    with open('tokenizer.pickle', 'rb') as handle:
+    with open("tokenizer.pickle", "rb") as handle:
         tokenizer = pickle.load(handle)  # load network tokenizer
     max_length = 200  # cut/pad all sentences to 400 tokens (words)
-    trunc_type = 'post'
-    padding_type = 'post'
+    trunc_type = "post"
+    padding_type = "post"
     embedding_dimension = 100
     return tokenizer, max_length, trunc_type, padding_type, embedding_dimension
 
@@ -89,11 +89,10 @@ For handling users, instead of using User.name maybe use User.id
 -Done (ATD 11/26/20 19:50)
 
 """
-# Tokens & Prefix
+# Tokens
 token = read_token()
-prefix = "?"
 
-# Master users (Convert to uid?)
+# Master users
 master_users = ["641816848865689611"]
 
 # Scraping info (Eventually write to file instead)
@@ -121,40 +120,40 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    if message.content.startswin('!#scrape'):
+    if message.content.startswin("!#scrape"):
         if str(message.author.id) in master_users:
             scrape_messages = True
-            await message.channel.send('WARNING: all messages following this message will be filed for training purpose.')
+            await message.channel.send("WARNING: all messages following this message will be filed for training purpose.")
     
-    if message.content.startswith('!#init_network'):
+    if message.content.startswith("!#init_network"):
         if str(message.author.id) in master_users:
-            await message.channel.send('Unpacking model...')
-            model = tf.keras.models.load_model('classifier/AoS_GPnet')
+            await message.channel.send("Unpacking model...")
+            model = tf.keras.models.load_model("classifier/AoS_GPnet")
             tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
             model_ready = True
-            await message.channel.send('Models loaded.  Displaying parameters...')
+            await message.channel.send("Models loaded.  Displaying parameters...")
             stringlist = []
             toxic_model.summary(print_fn=lambda x: stringlist.append(x))
             short_model_summary = "\n".join(stringlist)
             await message.channel.send(short_model_summary)
             
     
-    if message.content.startswith('!#process'):
+    if message.content.startswith("!#process"):
             if str(message.author.id) in master_users:
                 if model_ready == True:
                     prep_to_analyze = True
-                    await message.channel.send('Analysis framework active.')
+                    await message.channel.send("Analysis framework active.")
                 else:
-                    await message.channel.send('Models not loaded.  Please load models.')
+                    await message.channel.send("Models not loaded.  Please load models.")
 
-    if message.content.startswith('!#killall'):
+    if message.content.startswith("!#killall"):
         if str(message.author.id) in master_users:
-            await message.channel.send('Saving data...')
-            data = pd.DataFrame(data={'user': authors, 'message': messages})
-            data.to_csv('C:/Users/Thomas DeWitt/Downloads/discord_messages.csv', sep=',', index=False)  # Change this eventually
+            await message.channel.send("Saving data...")
+            data = pd.DataFrame(data={"user": authors, "message": messages})
+            data.to_csv("C:/Users/Thomas DeWitt/Downloads/discord_messages.csv", sep=",", index=False)  # Change this eventually
             await client.logout()
     
-    if scrape_messages == True:  # Eventually directly write to a file, also maybe only from one channel?
+    if scrape_messages == True:  # Eventually directly write to a buffer then file, also maybe only from one channel (specific channel id)
         messages.append(str(message.content))
         authors.append(str(message.author.id))
         
@@ -168,9 +167,22 @@ async def on_message(message):
         offender = str(message.author.id)
         toxiscores = manage_toxiscores(offender, toxic_score)
 
-    if message.content == '?hello':
-        reply = 'Greetings, citizen.'
+    if message.content == "?hello":
+        reply = "Greetings, citizen."
         await message.channel.send(reply)
+
+    if message.content == "?watchlist":  # Untested
+        tmp = dict(sorted(toxiscores.items(), key=lambda x: x[1], reverse=True))
+        tmp_keys = tmp.keys()
+        reply = "{: <40}".format("```Toxicity Watchlist:" + ": Score\n")
+        
+        place = 0
+        while place < 20 and place < len(tmp):
+            reply +=
+                    "{: <40}".format(f"{str(i+1)}. {str(client.get_user(tmp_keys[i]))}") + ": {:2.2f}\n".format(score)
+            place += 1
+
+        await message.channel.send(reply + "```")
     
     
 
