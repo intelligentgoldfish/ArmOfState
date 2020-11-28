@@ -157,13 +157,14 @@ async def on_message(message):
                     prep_to_analyze = True
                     await message.channel.send("Analysis framework active.")
                 else:
-                    await message.channel.send("Models not loaded.  Please load models.")
+                    await message.channel.send("Models not loaded. Please load models.")
 
     if message.content.startswith("!#killall"): #shutdown bot and disconnect from all servers
         if str(message.author.id) in master_users:
             await message.channel.send("Saving data...")
             data = pd.DataFrame(data={"user": authors, "message": messages})
             data.to_csv("C:/Users/Thomas DeWitt/Downloads/discord_messages.csv", sep=",", index=False)  # Change this eventually
+            save_scores()
             await client.logout()
             
     if message.content.startswith("!#standby"): #prevent model from running without terminating bot (for example, if burning too much cloud memory)
@@ -192,7 +193,7 @@ async def on_message(message):
     if message.content == "?help":
         reply = ""
         for command in commands:
-            reply += "{command} \n"
+            reply += f"{command} \n"
         await message.channel.send(reply)
 
     if message.content == "?watchlist":  # Untested
