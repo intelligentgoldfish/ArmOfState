@@ -55,8 +55,8 @@ def load_preprocessing():
     with open("tokenizer.pickle", "rb") as handle:
         tokenizer = pickle.load(handle)  # load network tokenizer
     max_length = 200  # cut/pad all sentences to 400 tokens (words)
-    trunc_type = "post"
-    padding_type = "post"
+    trunc_type = 'post' #leave as-is
+    padding_type = 'post' #leave as-is
     embedding_dimension = 100
     return tokenizer, max_length, trunc_type, padding_type, embedding_dimension
 
@@ -128,7 +128,7 @@ async def on_message(message):
     if message.content.startswith("!#init_network"):
         if str(message.author.id) in master_users:
             await message.channel.send("Unpacking model...")
-            model = tf.keras.models.load_model("classifier/AoS_GPnet")
+            model = tf.keras.models.load_model('classifier/AoS_GPnet') #leave as-is
             tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
             model_ready = True
             await message.channel.send("Models loaded.  Displaying parameters...")
@@ -175,13 +175,11 @@ async def on_message(message):
         tmp = dict(sorted(toxiscores.items(), key=lambda x: x[1], reverse=True))
         tmp_keys = tmp.keys()
         reply = "{: <40}".format("```Toxicity Watchlist:" + ": Score\n")
-        
         place = 0
         while place < 20 and place < len(tmp):
             reply +=
                     "{: <40}".format(f"{str(i+1)}. {str(client.get_user(tmp_keys[i]))}") + ": {:2.2f}\n".format(score)
             place += 1
-
         await message.channel.send(reply + "```")
     
     
