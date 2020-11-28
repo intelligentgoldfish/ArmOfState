@@ -201,8 +201,7 @@ async def on_message(message):
         reply = "{: <40}".format("```Toxicity Watchlist:" + ": Score\n")
         place = 0
         while place < 20 and place < len(tmp):
-            reply +=
-                    "{: <40}".format(f"{str(i+1)}. {str(client.get_user(tmp_keys[i]))}") + ": {:2.2f}\n".format(score)
+            reply += "{: <40}".format(f"{str(i+1)}. {str(client.get_user(tmp_keys[i]))}") + ": {:2.2f}\n".format(score)
             place += 1
         await message.channel.send(reply + "```")
     
