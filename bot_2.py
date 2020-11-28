@@ -60,8 +60,10 @@ def load_preprocessing():
     embedding_dimension = 100
     return tokenizer, max_length, trunc_type, padding_type, embedding_dimension
 
+penalizing_threshold = 0.30
+
 def score_text(toxic_preds):
-    if max(toxic_preds) <= 60:
+    if max(toxic_preds) <= penalizing_threshold:
         score = 0
     else:
         scale = max(toxic_preds)
