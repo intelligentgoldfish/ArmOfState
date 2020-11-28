@@ -1,0 +1,3 @@
+# Ignore token & data
+token.txt
+*.csv
