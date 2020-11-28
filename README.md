@@ -12,4 +12,4 @@ Over time, users accumulate scores, and the toxicity rankings can be called at a
 
 Future updates are planned to include the following: remove extremely toxic users to quarantine channels, set server admins as master users for server, generate lists of toxic examples, train on data from server to update self and adapt to users, identify explicit harassment and address it, add additional user commands.
 
-At the moment, no specific feature is guaranteed to be added.  Once the existing structure has been deployed and proven, we'll talk.  Until then, we promise nothing.
+At the moment, we don't guarantee that we'll add any specific feature.  Once the existing structure has been deployed and proven, we'll talk.  Until then, we promise nothing.
