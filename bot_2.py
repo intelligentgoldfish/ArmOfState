@@ -97,6 +97,17 @@ token = read_token()
 # Master users
 master_users = ["641816848865689611"]
 
+# List of commands
+commands = ["command (authorization): function",
+            "?help (standard): Call command list",
+            "?hello (standard): Greet the bot",
+            "?watchlist (standard): Get top 20 on toxicity watchlist",
+            "!#scrape (master): Initialize data scraping (for later use in unsupported features)",
+            "!#init_network (master): Load model and preprocessing methods",
+            "!#process (master): Run model",
+            "!#killall (master): Terminate runtime on EC2 instance"
+           ]
+
 # Scraping info (Eventually write to file instead)
 messages = []
 authors = []
@@ -148,12 +159,17 @@ async def on_message(message):
                 else:
                     await message.channel.send("Models not loaded.  Please load models.")
 
-    if message.content.startswith("!#killall"):
+    if message.content.startswith("!#killall"): #shutdown bot and disconnect from all servers
         if str(message.author.id) in master_users:
             await message.channel.send("Saving data...")
             data = pd.DataFrame(data={"user": authors, "message": messages})
             data.to_csv("C:/Users/Thomas DeWitt/Downloads/discord_messages.csv", sep=",", index=False)  # Change this eventually
             await client.logout()
+            
+    if message.content.startswith("!#standby"): #prevent model from running without terminating bot (for example, if burning too much cloud memory)
+        if str(message.author.id) in master_users:
+            await message.channel.send("Deactivating analysis framework.")
+            prep_to_analyze = False
     
     if scrape_messages == True:  # Eventually directly write to a buffer then file, also maybe only from one channel (specific channel id)
         messages.append(str(message.content))
@@ -167,10 +183,16 @@ async def on_message(message):
         toxic_results = np.argmax(toxic_preds, axis=1)
         toxic_score = score_text(toxic_results)
         offender = str(message.author.id)
-        toxiscores = manage_toxiscores(offender, toxic_score)
+        manage_toxiscores(offender, toxic_score)
 
     if message.content == "?hello":
         reply = "Greetings, citizen."
+        await message.channel.send(reply)
+        
+    if message.content == "?help":
+        reply = ""
+        for command in commands:
+            reply += "{command} \n"
         await message.channel.send(reply)
 
     if message.content == "?watchlist":  # Untested
