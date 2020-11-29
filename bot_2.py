@@ -9,6 +9,7 @@ Contributor: Andrew Lu
 
 # ArmOfState2
 
+import os
 import discord
 import csv
 import pickle
@@ -21,14 +22,13 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 print(tf.__version__)
 print(keras.__version__)
 
-# TO-DO:
-# DONE - Create and import ExeNet tokenizer and ExeNet model alongside ToxiNet resources
-# Dynamically handle rankings
-# Create user list
-# DONE - Handle new users coming in (See manage_toxiscores)
 
+# Path
+dirs = os.getcwd()
+
+# Discord token
 def read_token():
-    with open("token.txt", "r") as file:
+    with open(f"{dirs}/token.txt", "r") as file:
         lines = file.readlines()
         return lines[0].strip()
 
@@ -36,25 +36,25 @@ def read_token():
 def load_scores():
     scores = {}
     try:
-        with open("scores.csv", "r", newline="") as csvfile:
+        with open(f"{dirs}/scores.csv", "r", newline="") as csvfile:
             lines = csv.reader(csvfile)
             for line in lines:
                 scores[str(line[0])] = float(line[1])
         return scores
     except:
-        with open("scores.csv", "w"):
+        with open(f"{dirs}/scores.csv", "w"):
             return scores
     
 def save_scores():  # have it update every 10 minutes or something eventually
-    with open("scores.csv", "w", newline="") as csvfile:
+    with open(f"{dirs}/scores.csv", "w", newline="") as csvfile:
         save = csv.writer(csvfile)
         for pairs in toxiscores.items():
             save.writerow([str(pairs[0]), str(pairs[1])])
 
 def load_preprocessing():
-    with open("tokenizer.pickle", "rb") as handle:
+    with open(f"{dirs}/tokenizer.pickle", "rb") as handle:
         tokenizer = pickle.load(handle)  # load network tokenizer
-    max_length = 200  # cut/pad all sentences to 400 tokens (words)
+    max_length = 200  # cut/pad all sentences to 200 tokens (words)
     trunc_type = 'post' #leave as-is
     padding_type = 'post' #leave as-is
     embedding_dimension = 100
@@ -85,12 +85,7 @@ def manage_toxiscores(uid, message_score):
 
     toxiscores[uid] = round(user_score, 2)
 
-"""
-Notes:
-For handling users, instead of using User.name maybe use User.id
--Done (ATD 11/26/20 19:50)
 
-"""
 # Tokens
 token = read_token()
 
@@ -141,7 +136,7 @@ async def on_message(message):
     if message.content.startswith("!#init_network"):
         if str(message.author.id) in master_users:
             await message.channel.send("Unpacking model...")
-            model = tf.keras.models.load_model('classifier/AoS_GPnet') #leave as-is
+            model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
             tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
             model_ready = True
             await message.channel.send("Models loaded.  Displaying parameters...")
@@ -163,7 +158,7 @@ async def on_message(message):
         if str(message.author.id) in master_users:
             await message.channel.send("Saving data...")
             data = pd.DataFrame(data={"user": authors, "message": messages})
-            data.to_csv("C:/Users/Thomas DeWitt/Downloads/discord_messages.csv", sep=",", index=False)  # Change this eventually
+            data.to_csv(f"{dirs}/discord_messages.csv", sep=",", index=False)  # Change this eventually
             save_scores()
             await client.logout()
             
@@ -207,8 +202,6 @@ async def on_message(message):
         await message.channel.send(reply + "```")
     
     
-
-
 
 client.run(token)
 
