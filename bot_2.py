@@ -136,11 +136,7 @@ async def on_message(message):
         if str(message.author.id) in master_users:
             await message.channel.send("Unpacking model...")
             model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
-<<<<<<< HEAD
-            tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
-=======
-            tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
->>>>>>> 3b8d76c564f3739ff0744377ff91a723379de2bb
+            tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = 
             model_ready = True
             await message.channel.send("Models loaded.  Displaying parameters...")
             stringlist = []
