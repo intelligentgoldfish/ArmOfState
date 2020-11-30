@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Aug 15 21:45:14 2020
-
 @author: Thomas DeWitt
-
 Contributor: Andrew Lu
 """
 
@@ -17,7 +15,6 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-# from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 print(tf.__version__)
 print(keras.__version__)
@@ -57,10 +54,11 @@ def load_preprocessing():
     max_length = 200  # cut/pad all sentences to 200 tokens (words)
     trunc_type = 'post' #leave as-is
     padding_type = 'post' #leave as-is
-    embedding_dimension = 100
-    return tokenizer, max_length, trunc_type, padding_type, embedding_dimension
-
-penalizing_threshold = 0.30
+    penalizing_threshold = 0.30 #min individual
+    modifier = lambda x : round(pow(1.075, -3/8 * x), 2)
+    gain = 1
+    loss = 1 # Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, 1 gain/loss default
+    return tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss
 
 def score_text(toxic_preds):
     if max(toxic_preds) <= penalizing_threshold:
@@ -94,9 +92,9 @@ master_users = ["641816848865689611"]
 
 # List of commands
 commands = ["command (authorization): function",
-            "?help (standard): Call command list",
-            "?hello (standard): Greet the bot",
-            "?watchlist (standard): Get top 20 on toxicity watchlist",
+            "^help (standard): Call command list",
+            "^hello (standard): Greet the bot",
+            "^watchlist (standard): Get top 20 on toxicity watchlist",
             "!#scrape (master): Initialize data scraping (for later use in unsupported features)",
             "!#init_network (master): Load model and preprocessing methods",
             "!#process (master): Run model",
@@ -115,20 +113,21 @@ model_ready = False
 # Load toxicity scores
 toxiscores = load_scores()
 
-# Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, 1 gain/loss default
-modifier = lambda x : round(pow(1.075, -3/8 * x), 2)
-gain = 1
-loss = 1
-
 client = discord.Client()
 
 @client.event
 async def on_message(message):
+    # we need these lmao
+    global scrape_messages
+    global prep_to_analyze
+    global model_ready
+    global toxiscores
+
     # Don't talk to bots (including self)
     if message.author.bot:
         return
     
-    if message.content.startswin("!#scrape"):
+    if message.content.startswith("!#scrape"):
         if str(message.author.id) in master_users:
             scrape_messages = True
             await message.channel.send("WARNING: all messages following this message will be filed for training purpose.")
@@ -137,11 +136,15 @@ async def on_message(message):
         if str(message.author.id) in master_users:
             await message.channel.send("Unpacking model...")
             model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
+<<<<<<< HEAD
             tokenizer, max_length, trunc_type, padding_type, embedding_dimension = load_preprocessing()
+=======
+            tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
+>>>>>>> 3b8d76c564f3739ff0744377ff91a723379de2bb
             model_ready = True
             await message.channel.send("Models loaded.  Displaying parameters...")
             stringlist = []
-            toxic_model.summary(print_fn=lambda x: stringlist.append(x))
+            model.summary(print_fn=lambda x: stringlist.append(x))
             short_model_summary = "\n".join(stringlist)
             await message.channel.send(short_model_summary)
             
@@ -181,23 +184,23 @@ async def on_message(message):
         offender = str(message.author.id)
         manage_toxiscores(offender, toxic_score)
 
-    if message.content == "?hello":
+    if message.content == "^hello":
         reply = "Greetings, citizen."
         await message.channel.send(reply)
         
-    if message.content == "?help":
+    if message.content == "^help":
         reply = ""
         for command in commands:
             reply += f"{command} \n"
         await message.channel.send(reply)
 
-    if message.content == "?watchlist":  # Untested
+    if message.content == "^watchlist":  # Untested
         tmp = dict(sorted(toxiscores.items(), key=lambda x: x[1], reverse=True))
         tmp_keys = tmp.keys()
-        reply = "{: <40}".format("```Toxicity Watchlist:" + ": Score\n")
+        reply = "{: <40}".format("```Toxicity Watchlist" + ": Score\n")
         place = 0
         while place < 20 and place < len(tmp):
-            reply += "{: <40}".format(f"{str(i+1)}. {str(client.get_user(tmp_keys[i]))}") + ": {:2.2f}\n".format(score)
+            reply += "{: <40}".format(f"{str(place+1)}. {str(client.get_user(tmp_keys[place]))}") + ": {:2.2f}\n".format(user_score)
             place += 1
         await message.channel.send(reply + "```")
     
