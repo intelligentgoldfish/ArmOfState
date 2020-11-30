@@ -127,7 +127,7 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    if message.content.startswin("!#scrape"):
+    if message.content.startswith("!#scrape"):
         if str(message.author.id) in master_users:
             scrape_messages = True
             await message.channel.send("WARNING: all messages following this message will be filed for training purpose.")
