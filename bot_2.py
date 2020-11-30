@@ -92,9 +92,9 @@ master_users = ["641816848865689611"]
 
 # List of commands
 commands = ["command (authorization): function",
-            "#help (standard): Call command list",
-            "#hello (standard): Greet the bot",
-            "#watchlist (standard): Get top 20 on toxicity watchlist",
+            "^help (standard): Call command list",
+            "^hello (standard): Greet the bot",
+            "^watchlist (standard): Get top 20 on toxicity watchlist",
             "!#scrape (master): Initialize data scraping (for later use in unsupported features)",
             "!#init_network (master): Load model and preprocessing methods",
             "!#process (master): Run model",
@@ -180,17 +180,17 @@ async def on_message(message):
         offender = str(message.author.id)
         manage_toxiscores(offender, toxic_score)
 
-    if message.content == "#hello":
+    if message.content == "^hello":
         reply = "Greetings, citizen."
         await message.channel.send(reply)
         
-    if message.content == "#help":
+    if message.content == "^help":
         reply = ""
         for command in commands:
             reply += f"{command} \n"
         await message.channel.send(reply)
 
-    if message.content == "#watchlist":  # Untested
+    if message.content == "^watchlist":  # Untested
         tmp = dict(sorted(toxiscores.items(), key=lambda x: x[1], reverse=True))
         tmp_keys = tmp.keys()
         reply = "{: <40}".format("```Toxicity Watchlist:" + ": Score\n")
