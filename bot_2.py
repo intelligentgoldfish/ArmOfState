@@ -60,6 +60,11 @@ def load_preprocessing():
     loss = 1 # Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, 1 gain/loss default
     return tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss
 
+# Load model and hyperparameters
+model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
+tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
+
+# scoring and score management
 def score_text(toxic_preds):
     if max(toxic_preds) <= penalizing_threshold:
         score = 0
@@ -95,10 +100,10 @@ commands = ["command (authorization): function",
             "^help (standard): Call command list",
             "^hello (standard): Greet the bot",
             "^watchlist (standard): Get top 20 on toxicity watchlist",
+            "!#init (master): Load model and preprocessing methods",
+            "!#startup (master): Run model",
             "!#scrape (master): Initialize data scraping (for later use in unsupported features)",
-            "!#init_network (master): Load model and preprocessing methods",
-            "!#process (master): Run model",
-            "!#killall (master): Terminate runtime on EC2 instance"
+            "!#shutdown (master): Terminate runtime on EC2 instance"
            ]
 
 # Scraping info (Eventually write to file instead)
@@ -132,20 +137,17 @@ async def on_message(message):
             scrape_messages = True
             await message.channel.send("WARNING: all messages following this message will be filed for training purpose.")
     
-    if message.content.startswith("!#init_network"):
+    if message.content.startswith("!#init"):
         if str(message.author.id) in master_users:
-            await message.channel.send("Unpacking model...")
-            model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
-            tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
             model_ready = True
-            await message.channel.send("Models loaded.  Displaying parameters...")
+            await message.channel.send("Model initialized.  Displaying parameters...")
             stringlist = []
             model.summary(print_fn=lambda x: stringlist.append(x))
             short_model_summary = "\n".join(stringlist)
             await message.channel.send(short_model_summary)
             
     
-    if message.content.startswith("!#process"):
+    if message.content.startswith("!#startup"):
             if str(message.author.id) in master_users:
                 if model_ready == True:
                     prep_to_analyze = True
@@ -153,7 +155,7 @@ async def on_message(message):
                 else:
                     await message.channel.send("Models not loaded. Please load models.")
 
-    if message.content.startswith("!#killall"): #shutdown bot and disconnect from all servers
+    if message.content.startswith("!#shutdown"): #shutdown bot and disconnect from all servers
         if str(message.author.id) in master_users:
             await message.channel.send("Saving data...")
             data = pd.DataFrame(data={"user": authors, "message": messages})
