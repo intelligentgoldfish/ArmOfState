@@ -136,7 +136,7 @@ async def on_message(message):
         if str(message.author.id) in master_users:
             await message.channel.send("Unpacking model...")
             model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
-            tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = 
+            tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
             model_ready = True
             await message.channel.send("Models loaded.  Displaying parameters...")
             stringlist = []
@@ -193,7 +193,7 @@ async def on_message(message):
     if message.content == "^watchlist":  # Untested
         tmp = dict(sorted(toxiscores.items(), key=lambda x: x[1], reverse=True))
         tmp_keys = tmp.keys()
-        reply = "{: <40}".format("```Toxicity Watchlist" + ": Score\n")
+        reply = "{: <40}".format("```Toxicity Watchlist") + ": Score\n"
         place = 0
         while place < 20 and place < len(tmp):
             reply += "{: <40}".format(f"{str(place+1)}. {str(client.get_user(tmp_keys[place]))}") + ": {:2.2f}\n".format(user_score)
