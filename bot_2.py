@@ -192,7 +192,7 @@ async def on_message(message):
         toxic_tokens = tokenizer.texts_to_sequences(words)
         toxic_ready = pad_sequences(toxic_tokens, maxlen=max_length, padding=padding_type, truncating=trunc_type)
         toxic_preds = model.predict(toxic_ready)
-        toxic_results = np.maximum(toxic_preds)
+        toxic_results = np.amax(toxic_preds, axis=1)
         toxic_score = score_text(toxic_results)
         if debug_mode:
             print("Raw model out: ",str(toxic_preds))
