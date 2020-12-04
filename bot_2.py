@@ -19,6 +19,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 print(tf.__version__)
 print(keras.__version__)
 
+print('All modules successfully loaded.  Initializing...')
 
 # Path
 dirs = os.getcwd()
@@ -120,6 +121,8 @@ toxiscores = load_scores()
 
 client = discord.Client()
 
+print('Connected to client.')
+
 @client.event
 async def on_message(message):
     # we need these lmao
@@ -161,6 +164,7 @@ async def on_message(message):
             data = pd.DataFrame(data={"user": authors, "message": messages})
             data.to_csv(f"{dirs}/discord_messages.csv", sep=",", index=False)  # Change this eventually
             save_scores()
+            await message.channel.send("Tschuss.")
             await client.logout()
             
     if message.content.startswith("!#standby"): #prevent model from running without terminating bot (for example, if burning too much cloud memory)
@@ -208,4 +212,4 @@ async def on_message(message):
 
 client.run(token)
 
-print('Connected to client.')
+print('Connection closed.')
