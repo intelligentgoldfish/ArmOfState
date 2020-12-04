@@ -206,7 +206,7 @@ async def on_message(message):
         
         place = 0
         while place < 20 and place < len(tmp):
-            reply += "{: <40}".format(f"{str(place+1)}. {str(client.get_user(int(tmp_uid[place])))}") + ": {:2.2f}\n".format(tmp_score[place])
+            reply += "{: <40}".format(f"{str(place+1)}. {str(client.get_user(int(tmp_uid[place])))}") + ": {:2.2f}\n".format(tmp_scores[place])
             place += 1
         await message.channel.send(reply + "```")
     
