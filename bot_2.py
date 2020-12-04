@@ -71,7 +71,7 @@ def score_text(toxic_preds):
         score = 0
     else:
         scale = max(toxic_preds)
-        rank = toxic_preds.index(scale)
+        rank = toxic_preds.where(toxic_preds == scale) + 1
         score = scale * rank
     return score
 
