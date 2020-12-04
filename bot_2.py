@@ -105,7 +105,9 @@ commands = ["command (authorization): function",
             "!#startup (master): Run model",
             "!#standby (master): Pause analysis while keeping bot online",
             "!#scrape (master): Initialize data scraping (for later use in unsupported features)",
-            "!#shutdown (master): Terminate runtime on EC2 instance"
+            "!#shutdown (master): Terminate runtime on EC2 instance",
+            "!#debug (master): Initialize debug mode",
+            "!#nodebug (master): Deactivate debug mode"
            ]
 
 # Scraping info (Eventually write to file instead)
@@ -116,6 +118,7 @@ authors = []
 scrape_messages = False
 prep_to_analyze = False
 model_ready = False
+debug_mode = False
 
 # Load toxicity scores
 toxiscores = load_scores()
@@ -131,10 +134,17 @@ async def on_message(message):
     global prep_to_analyze
     global model_ready
     global toxiscores
+    global debug_mode
 
     # Don't talk to bots (including self)
     if message.author.bot:
         return
+    
+    if message.content.startswith("!#debug"):
+        debug_mode = True
+    
+    if message.content.startswith("!#nodebug"):
+        debug_mode = False
     
     if message.content.startswith("!#scrape"):
         if str(message.author.id) in master_users:
@@ -184,6 +194,10 @@ async def on_message(message):
         toxic_preds = model.predict(toxic_ready)
         toxic_results = np.argmax(toxic_preds, axis=1)
         toxic_score = score_text(toxic_results)
+        if debug_mode:
+            print("Raw model out: ",str(toxic_preds))
+            print(str(toxic_results))
+            print(str(toxic_score))
         offender = str(message.author.id)
         manage_toxiscores(offender, toxic_score)
 
