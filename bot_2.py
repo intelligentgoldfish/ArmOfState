@@ -194,11 +194,13 @@ async def on_message(message):
 
     if message.content == "^watchlist":  # Untested
         tmp = dict(sorted(toxiscores.items(), key=lambda x: x[1], reverse=True))
-        tmp_keys = tmp.keys()
+        tmp_scores = [score for uid, score in tmp.items()]
+
         reply = "{: <40}".format("```Toxicity Watchlist") + ": Score\n"
+        
         place = 0
         while place < 20 and place < len(tmp):
-            reply += "{: <40}".format(f"{str(place+1)}. {str(client.get_user(tmp_keys[place]))}") + ": {:2.2f}\n".format(user_score)
+            reply += "{: <40}".format(f"{str(place+1)}. {str(client.get_user(tmp_scores[place]))}") + ": {:2.2f}\n".format(user_score)
             place += 1
         await message.channel.send(reply + "```")
     
