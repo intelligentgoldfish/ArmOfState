@@ -103,6 +103,7 @@ commands = ["command (authorization): function",
             "^watchlist (standard): Get top 20 on toxicity watchlist",
             "!#init (master): Load model and preprocessing methods",
             "!#startup (master): Run model",
+            "!#standby (master): Pause analysis while keeping bot online",
             "!#scrape (master): Initialize data scraping (for later use in unsupported features)",
             "!#shutdown (master): Terminate runtime on EC2 instance"
            ]
