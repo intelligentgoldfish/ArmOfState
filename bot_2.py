@@ -50,7 +50,7 @@ def save_scores():  # have it update every 10 minutes or something eventually
             save.writerow([str(pairs[0]), str(pairs[1])])
 
 def load_preprocessing():
-    with open(f"{dirs}/tokenizer.pickle", "rb") as handle:
+    with open(f"{dirs}/tokenizer2.pickle", "rb") as handle:
         tokenizer = pickle.load(handle)  # load network tokenizer
     max_length = 200  # cut/pad all sentences to 200 tokens (words)
     trunc_type = 'post' #leave as-is
@@ -62,7 +62,7 @@ def load_preprocessing():
     return tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss
 
 # Load model and hyperparameters
-model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet') #leave as-is
+model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet_V2') #leave as-is
 tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
 
 # scoring and score management
@@ -154,11 +154,11 @@ async def on_message(message):
     if message.content.startswith("!#init"):
         if str(message.author.id) in master_users:
             model_ready = True
-            await message.channel.send("Model initialized.  Displaying parameters...")
-            stringlist = []
-            model.summary(print_fn=lambda x: stringlist.append(x))
-            short_model_summary = "\n".join(stringlist)
-            await message.channel.send(short_model_summary)
+            await message.channel.send("Model initialized.  Standing by.")
+            #stringlist = []
+            #model.summary(print_fn=lambda x: stringlist.append(x))
+            #short_model_summary = "\n".join(stringlist)
+            #await message.channel.send(short_model_summary)
             
     
     if message.content.startswith("!#startup"):
@@ -167,7 +167,7 @@ async def on_message(message):
                     prep_to_analyze = True
                     await message.channel.send("Analysis framework active.")
                 else:
-                    await message.channel.send("Models not loaded. Please load models.")
+                    await message.channel.send("Model not loaded. Please load model.")
 
     if message.content.startswith("!#shutdown"): #shutdown bot and disconnect from all servers
         if str(message.author.id) in master_users:
