@@ -88,7 +88,7 @@ def manage_toxiscores(uid, message_score):
     else:  # Gaining toxicity
         user_score += modifier(user_score) * message_score * gain
 
-    toxiscores[uid] = round(user_score, 2)
+    toxiscores[uid] = np.round(user_score, 2)
 
 
 # Tokens
