@@ -55,7 +55,7 @@ def load_preprocessing():
     max_length = 200  # cut/pad all sentences to 200 tokens (words)
     trunc_type = 'post' #leave as-is
     padding_type = 'post' #leave as-is
-    penalizing_threshold = 0.30 #min individual
+    penalizing_threshold = 0.27 #min individual
     modifier = lambda x : round(pow(1.075, -3/8 * x), 2)
     gain = 1
     loss = 1 # Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, 1 gain/loss default
@@ -71,8 +71,9 @@ def score_text(toxic_preds):
         score = 0
     else:
         scale = max(toxic_preds)
-        rank = np.where(toxic_preds == scale) + 1
-        score = scale * rank[0]
+        rank = np.where(toxic_preds == scale)
+        rank = rank[0] + 1
+        score = scale * rank
     return score
 
 def manage_toxiscores(uid, message_score):
