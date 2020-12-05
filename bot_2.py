@@ -71,8 +71,8 @@ def score_text(toxic_preds):
         score = 0
     else:
         scale = max(toxic_preds)
-        rank = toxic_preds.where(toxic_preds == scale) + 1
-        score = scale * rank
+        rank = np.where(toxic_preds == scale) + 1
+        score = scale * rank[0]
     return score
 
 def manage_toxiscores(uid, message_score):
