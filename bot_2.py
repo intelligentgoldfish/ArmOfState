@@ -56,7 +56,7 @@ def load_preprocessing():
     trunc_type = 'post' #leave as-is
     padding_type = 'post' #leave as-is
     penalizing_threshold = 0.27 #min individual
-    modifier = lambda x : round(pow(1.075, -3/8 * x), 2)
+    modifier = lambda x : np.round(pow(1.075, -3/8 * x), 2)
     gain = 1
     loss = 1 # Toxicity score modifier & factor modifier should be multiplied by for gaining/losing toxicity, 1 gain/loss default
     return tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss
