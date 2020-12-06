@@ -89,6 +89,7 @@ def manage_toxiscores(uid, message_score):
         user_score += modifier(user_score) * message_score * gain
 
     toxiscores[uid] = np.round(user_score, 2)
+    return toxiscores
 
 
 # Tokens
@@ -200,7 +201,7 @@ async def on_message(message):
             print(str(toxic_results))
             print(str(toxic_score))
         offender = str(message.author.id)
-        manage_toxiscores(offender, toxic_score)
+        toxiscores = manage_toxiscores(offender, toxic_score)
 
     if message.content == "^hello":
         reply = "Greetings, citizen."
