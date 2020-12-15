@@ -74,7 +74,7 @@ def score_text(toxic_preds):
         rank = np.where(toxic_preds == scale)
         rank = rank[0]
         rank = rank[0] + 1
-        score = scale * rank
+        score = np.abs(scale) * rank
     return score
 
 def manage_toxiscores(uid, message_score):
@@ -87,7 +87,7 @@ def manage_toxiscores(uid, message_score):
         user_score -= modifier(user_score) * loss
         user_score = 0.00 if toxiscores[uid] <= 0.00 else user_score
     else:  # Gaining toxicity
-        user_score += modifier(user_score) * message_score * gain
+        user_score += np.abs(modifier(user_score) * message_score * gain)
 
     toxiscores[uid] = np.round(user_score, 2)
     return toxiscores
