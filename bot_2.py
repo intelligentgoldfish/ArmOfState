@@ -82,6 +82,7 @@ def manage_toxiscores(uid, message_score):
         toxiscores[uid] = 0.00
     
     user_score = toxiscores[uid]
+    message_score = np.abs(message_score)
     
     if message_score <= 0.00:  # Losing toxicity
         user_score -= modifier(user_score) * loss
