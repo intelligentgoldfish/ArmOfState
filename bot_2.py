@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Aug 15 21:45:14 2020
-@author: Thomas DeWitt
+Author: Thomas DeWitt
 Contributor: Andrew Lu
+
+Version 0.8 Alpha
+
+Any multi-line comments are reserved for future editions of the bot, and may not be changed,
+implemented, or removed without the author's express permission.
 """
 
 # ArmOfState2
@@ -15,7 +20,7 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+#from tensorflow.keras.preprocessing.sequence import pad_sequences
 print(tf.__version__)
 print(keras.__version__)
 
@@ -64,6 +69,45 @@ def load_preprocessing():
 # Load model and hyperparameters
 model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet_V2') #leave as-is
 tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
+
+"""
+def load_preprocessing():
+    binary_threshold = 0.55 # binary model toxicity threshold
+    multi_threshold = 0.55 # multi-class penalty threshold
+    modifier = lambda x : np.round(pow(1.075, -3/8 * x), 2)
+    gain = 1
+    loss = 1
+    return binary_threshold, multi_threshold, modifier, gain, loss
+
+bert_binary = tf.keras.models.load_model(f'{dirs}/classifier/AoS_BERT_binary')
+bert_multi = tf.keras.models.load_model(f'{dirs}/classifier/AoS_BERT_multi')
+
+def score_text(toxic_pred, msg):
+    toxic_pred = toxic_pred[0]
+    if toxic_pred <= penalizing_threshold:
+        score = 0
+    else:
+        score = toxic_pred
+        penalties = bert_multi.predict(msg)
+        for item in penalities:
+            if item >= multi_threshold:
+                score += item
+    return score
+
+def manage_toxiscores(uid, message_score):
+    if uid not in toxiscores.keys():
+        toxiscores[uid] = 0.00
+    
+    user_score = toxiscores[uid]
+    if message_score < 0:
+        raise ValueError("Message score cannot be less than 0")
+        message_score = np.abs(message_score)
+    
+    user_score += np.abs(modifier(user_score) * message_score * gain)
+
+    toxiscores[uid] = np.round(user_score, 2)
+    return toxiscores
+"""
 
 # scoring and score management
 def score_text(toxic_preds):
@@ -198,6 +242,14 @@ async def on_message(message):
         toxic_preds = model.predict(toxic_ready)
         toxic_results = np.amax(toxic_preds, axis=0)
         toxic_score = score_text(toxic_results)
+        """
+        words = tf.constant([words])
+        toxic_results = bert_binary.predict(words)
+        toxic_score = score_text(toxic_results, words)
+        if debug_mode:
+            print("Raw model out: ",str(toxic_preds))
+            print("Scored results: ",str(toxic_score))
+        """
         if debug_mode:
             print("Raw model out: ",str(toxic_preds))
             print(str(toxic_results))
