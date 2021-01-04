@@ -20,7 +20,11 @@ import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
-#from tensorflow.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+"""
+import warnings
+tf.get_logger().setLevel('ERROR')
+"""
 print(tf.__version__)
 print(keras.__version__)
 
@@ -100,7 +104,7 @@ def manage_toxiscores(uid, message_score):
     
     user_score = toxiscores[uid]
     if message_score < 0:
-        raise ValueError("Message score cannot be less than 0")
+        warnings.warn(f"Message score cannot be less than 0.  Received score of {message_score}")
         message_score = np.abs(message_score)
     
     user_score += np.abs(modifier(user_score) * message_score * gain)
