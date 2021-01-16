@@ -4,10 +4,10 @@ Created on Sat Aug 15 21:45:14 2020
 Author: Thomas DeWitt
 Contributor: Andrew Lu
 
-Version 0.8 Alpha
+Version 1.0 Alpha
 
-Any multi-line comments are reserved for future editions of the bot, and may not be changed,
-implemented, or removed without the author's express permission.
+Any multi-line comments are reserved for future editions or version transitions of the bot, 
+and may not be changed, implemented, or removed without the author's express permission.
 """
 
 # ArmOfState2
@@ -15,16 +15,19 @@ implemented, or removed without the author's express permission.
 import os
 import discord
 import csv
+"""
 import pickle
+"""
 import pandas as pd
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+"""
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 """
 import warnings
 tf.get_logger().setLevel('ERROR')
-"""
+
 print(tf.__version__)
 print(keras.__version__)
 
@@ -58,6 +61,7 @@ def save_scores():  # have it update every 10 minutes or something eventually
         for pairs in toxiscores.items():
             save.writerow([str(pairs[0]), str(pairs[1])])
 
+"""
 def load_preprocessing():
     with open(f"{dirs}/tokenizer2.pickle", "rb") as handle:
         tokenizer = pickle.load(handle)  # load network tokenizer
@@ -73,8 +77,8 @@ def load_preprocessing():
 # Load model and hyperparameters
 model = tf.keras.models.load_model(f'{dirs}/classifier/AoS_GPnet_V2') #leave as-is
 tokenizer, max_length, trunc_type, padding_type, penalizing_threshold, modifier, gain, loss = load_preprocessing()
-
 """
+
 def load_preprocessing():
     binary_threshold = 0.55 # binary model toxicity threshold
     multi_threshold = 0.55 # multi-class penalty threshold
@@ -111,8 +115,8 @@ def manage_toxiscores(uid, message_score):
 
     toxiscores[uid] = np.round(user_score, 2)
     return toxiscores
-"""
 
+"""
 # scoring and score management
 def score_text(toxic_preds):
     if max(toxic_preds) <= penalizing_threshold:
@@ -140,7 +144,7 @@ def manage_toxiscores(uid, message_score):
 
     toxiscores[uid] = np.round(user_score, 2)
     return toxiscores
-
+"""
 
 # Tokens
 token = read_token()
@@ -240,6 +244,7 @@ async def on_message(message):
         authors.append(str(message.author.id))
         
     if prep_to_analyze == True:
+        """
         words = str(message.content)
         toxic_tokens = tokenizer.texts_to_sequences(words)
         toxic_ready = pad_sequences(toxic_tokens, maxlen=max_length, padding=padding_type, truncating=trunc_type)
@@ -253,7 +258,7 @@ async def on_message(message):
         if debug_mode:
             print("Raw model out: ",str(toxic_preds))
             print("Scored results: ",str(toxic_score))
-        """
+        
         if debug_mode:
             print("Raw model out: ",str(toxic_preds))
             print(str(toxic_results))
