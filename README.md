@@ -1,9 +1,9 @@
-# ArmOfState V.0.5
+# ArmOfState V.0.6
 Source code for Arm of State Discord bot.
 
 Currently in cloud server deployment.
 
-We are aware that the current GRU model is heavily flawed due to undetected data corruption, and thus has wildly erratic performance.  It is scheduled to be replaced by a two-model ensemble: a BERT-based binary classifier, and a retrained GRU multi-class classifier.
+Prior BERT-based architecture failed due to memory overload.  Switched to custom GRUs implemented in TFLite.
 
 # Purpose
 To assist server creators and administrators with server moderation by tracking user interactions.
