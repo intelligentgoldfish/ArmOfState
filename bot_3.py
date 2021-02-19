@@ -218,7 +218,7 @@ async def on_message(message):
         authors.append(str(message.author.id))
         
     if prep_to_analyze == True:
-        words = tf.constant([words]) # set words as tensors
+        words = tf.constant([message.content]) # set words as tensors
         words = V5_interpreter.predict(words) # vectorize for tflite embeddings
         toxic_preds = conduct_inference(V5_binary, binary_input_details, binary_output_details, words) # run tflite inference
         toxic_score = score_text(toxic_preds, words) # score text
