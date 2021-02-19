@@ -69,12 +69,21 @@ def score_text(toxic_pred, msg):
     if toxic_pred <= binary_threshold:
         score = 0
     else:
+        toxic_pred = conduct_inference(V5_multi, multi_input_details, multi_output_details, msg)
+        scale = max(toxic_pred)
+        rank = np.where(toxic_pred == scale)
+        rank = rank[0]
+        rank = rank[0] + 1
+        score = np.abs(scale) * rank
+        # the below code is giving some hella weird glitches so we're reverting to old scoring systems
+        """
         score = toxic_pred
         penalties = conduct_inference(V5_multi, multi_input_details, multi_output_details, msg)
         penalties = penalties[0]
         for item in penalties:
             if item.any() >= multi_threshold:
                 score += item
+        """"
     return score
 
 # update scores for each user
@@ -227,11 +236,6 @@ async def on_message(message):
         if debug_mode:
             print("Raw model out: ",str(toxic_preds))
             print("Scored results: ",str(toxic_score))
-        
-        if debug_mode:
-            print("Raw model out: ",str(toxic_preds))
-            print(str(toxic_preds))
-            print(str(toxic_score))
         offender = str(message.author.id)
         toxiscores = manage_toxiscores(offender, toxic_score)
 
