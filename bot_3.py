@@ -71,7 +71,7 @@ def score_text(toxic_pred, msg):
     else:
         score = toxic_pred
         penalties = conduct_inference(V5_multi, multi_input_details, multi_output_details, msg)
-        penalties = penalties[0].numpy()
+        penalties = penalties[0]
         for item in penalties:
             if item.any() >= multi_threshold:
                 score += item
