@@ -108,6 +108,7 @@ def prepare_model_for_inference(path):
 
 # conduct inference with prepared TFLite model
 def conduct_inference(inference_model, input_details, output_details, data):
+    data = tf.cast(data, dtype='float32')
     inference_model.set_tensor(input_details[0]['index'], data)
     inference_model.invoke()
     outputs = inference_model.get_tensor(output_details[0]['index'])
