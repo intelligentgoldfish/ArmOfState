@@ -116,7 +116,7 @@ def conduct_inference(inference_model, input_details, output_details, data):
 
 binary_path = f'{dirs}/classifier/V5_binary'
 multi_path = f'{dirs}/classifier/V5_multi'
-interpreter_path = f'{dirs}/classifier/AoS_V5_interpreter'
+interpreter_path = f'{dirs}/classifier/AoS_V5_Interpreter'
 
 binary_threshold, multi_threshold, modifier, gain, loss = load_preprocessing()
 V5_binary, binary_input_details, binary_output_details, binary_input_shape = prepare_model_for_inference(binary_path)
