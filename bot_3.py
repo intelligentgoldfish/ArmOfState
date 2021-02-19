@@ -83,7 +83,7 @@ def score_text(toxic_pred, msg):
         for item in penalties:
             if item.any() >= multi_threshold:
                 score += item
-        """"
+        """
     return score
 
 # update scores for each user
